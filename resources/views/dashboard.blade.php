@@ -166,8 +166,9 @@
 
         .content {
             display: grid;
-            grid-template-columns: 1.6fr 1fr;
+            grid-template-columns: 1.6fr 0.9fr;
             gap: 20px;
+            align-items: start;
         }
 
         .panel {
@@ -175,12 +176,67 @@
             border: 1px solid #1f2937;
             border-radius: 12px;
             padding: 24px;
+            width: 100%;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
         .panel-title {
             font-size: 17px;
             font-weight: 600;
             margin-bottom: 20px;
+        }
+
+        .status-filter select {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-filter select {
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .status-filter select:hover {
+            background: #15803d;
+        }
+
+        .status-filter select option {
+            background: #111827;
+            color: white;
+        }
+
+        .panel-header .panel-title {
+            margin: 0;
+        }
+
+        .create-button {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #16a34a;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 7px;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .create-button:hover {
+            background: #15803d;
         }
 
         /* =========================
@@ -238,8 +294,106 @@
            STATUS PEMBAYARAN
         ========================= */
 
-        .payment-status {
-            margin-bottom: 24px;
+        .status-panel {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .status-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            width: 100%;
+        }
+
+        /* =========================
+           STATUS TITLE
+        ========================= */
+
+        .status-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .status-title-row .panel-title {
+            margin-bottom: 0;
+        }
+
+        .payment-status+.payment-status {
+            margin-top: 28px;
+        }
+
+        /* =========================
+            MONTH DROPDOWN
+        ========================= */
+
+        .month-filter {
+            position: relative;
+            display: inline-block;
+        }
+
+        .month-dropdown-button {
+            gap: 6px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 7px;
+            background: #16a34a;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 80px;
+        }
+
+        .month-dropdown-button:hover {
+            background: #15803d;
+        }
+
+        .month-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 100px;
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 3px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .month-dropdown-menu.show {
+            display: block;
+        }
+
+        .month-dropdown-menu a {
+            display: block;
+            padding: 11px 13px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: 5px;
+        }
+
+        .month-dropdown-menu a:hover {
+            background: #1f2937;
+        }
+
+        .month-dropdown-menu::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .month-dropdown-menu::-webkit-scrollbar-thumb {
+            background: #64748b;
+            border-radius: 3px;
         }
 
         .status-header {
@@ -330,10 +484,56 @@
     </style>
 </head>
 
+<script>
+
+    function toggleMonthDropdown() {
+
+        const dropdown = document.getElementById('monthDropdown');
+
+        dropdown.classList.toggle('show');
+
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const button = document.getElementById('monthDropdownBtn');
+        const dropdown = document.getElementById('monthDropdown');
+
+        button.addEventListener('click', function (event) {
+
+            event.stopPropagation();
+
+            dropdown.style.display =
+                dropdown.style.display === 'block'
+                    ? 'none'
+                    : 'block';
+        });
+
+        document.addEventListener('click', function () {
+            dropdown.style.display = 'none';
+        });
+
+    });
+
+
+    // Klik di luar dropdown → tutup
+    document.addEventListener('click', function (event) {
+
+        const dropdown = document.querySelector('.month-dropdown');
+        const menu = document.getElementById('monthDropdown');
+
+        if (!dropdown.contains(event.target)) {
+            menu.classList.remove('show');
+        }
+
+    });
+
+</script>
+
 <body>
 
     {{-- =========================
-         NAVBAR
+    NAVBAR
     ========================== --}}
 
     <nav class="navbar">
@@ -368,9 +568,7 @@
                 {{ auth()->user()->name ?? 'User' }}
             </span>
 
-            <form action="{{ route('logout') }}"
-                  method="POST"
-                  class="logout-form">
+            <form action="{{ route('logout') }}" method="POST" class="logout-form">
 
                 @csrf
 
@@ -386,7 +584,7 @@
 
 
     {{-- =========================
-         MAIN
+    MAIN
     ========================== --}}
 
     <main class="container">
@@ -405,7 +603,7 @@
 
 
         {{-- =========================
-             STATISTICS
+        STATISTICS
         ========================== --}}
 
         <section class="stats">
@@ -432,7 +630,7 @@
             <div class="stat-card">
 
                 <div class="stat-label">
-                    Kas terkumpul
+                    Total kas
                 </div>
 
                 <div class="stat-value">
@@ -440,7 +638,7 @@
                 </div>
 
                 <div class="stat-sub">
-                    pembayaran lunas
+                    kas terkumpul
                 </div>
 
             </div>
@@ -485,30 +683,35 @@
 
 
         {{-- =========================
-             LOWER CONTENT
+        LOWER CONTENT
         ========================== --}}
 
         <section class="content">
 
-
             {{-- PEMBAYARAN TERBARU --}}
-            <div class="panel">
+            <div class="panel panel-recent">
 
-                <h2 class="panel-title">
-                    Pembayaran terbaru
-                </h2>
+                <div class="panel-header">
+
+                    <h2 class="panel-title">
+                        Pembayaran terbaru
+                    </h2>
+
+                    <a href="{{ url('/pembayaran/create') }}" class="create-button">
+                        + Buat Pembayaran
+                    </a>
+
+                </div>
 
                 <table>
 
                     <thead>
-
                         <tr>
                             <th>Siswa</th>
                             <th>Tanggal</th>
                             <th>Jumlah</th>
                             <th>Status</th>
                         </tr>
-
                     </thead>
 
                     <tbody>
@@ -569,15 +772,42 @@
 
 
             {{-- STATUS PEMBAYARAN --}}
-            <div class="panel">
+            <div class="panel status-panel">
 
-                <h2 class="panel-title">
-                    Status pembayaran
-                </h2>
+                <div class="status-title-row">
+
+                    <h2 class="panel-title">
+                        Status pembayaran
+                    </h2>
+
+                    <div class="month-filter">
+
+                        <button type="button" class="month-dropdown-button" onclick="toggleMonthDropdown()">
+                            {{ \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('M Y') }}
+                            <span>▼</span>
+                        </button>
+
+                        <div id="monthDropdown" class="month-dropdown-menu">
+
+                            @foreach($daftarBulan as $item)
+
+                                <a href="{{ route('dashboard', ['bulan' => $item['bulan'], 'tahun' => $item['tahun']]) }}"
+
+                                    class="{{ ($bulan == $item['bulan'] && $tahun == $item['tahun']) ? 'active' : '' }}">
+                                    {{ $item['label'] }}
+
+                                </a>
+
+                            @endforeach
+
+                        </div>
+
+                    </div>
+
+                </div>
 
 
                 {{-- LUNAS --}}
-
                 <div class="payment-status">
 
                     <div class="status-header">
@@ -592,17 +822,15 @@
 
                     </div>
 
+                    @php
+                        $persenLunas = $totalSiswa > 0
+                            ? ($sudahLunas / $totalSiswa) * 100
+                            : 0;
+                    @endphp
+
                     <div class="progress">
 
-                        @php
-                            $persenLunas = $totalSiswa > 0
-                                ? ($sudahLunas / $totalSiswa) * 100
-                                : 0;
-                        @endphp
-
-                        <div
-                            class="progress-lunas"
-                            style="width: {{ $persenLunas }}%">
+                        <div class="progress-lunas" style="width: {{ $persenLunas }}%">
                         </div>
 
                     </div>
@@ -611,7 +839,6 @@
 
 
                 {{-- BELUM LUNAS --}}
-
                 <div class="payment-status">
 
                     <div class="status-header">
@@ -626,33 +853,32 @@
 
                     </div>
 
+                    @php
+                        $persenBelum = $totalSiswa > 0
+                            ? ($belumLunas / $totalSiswa) * 100
+                            : 0;
+                    @endphp
+
                     <div class="progress">
 
-                        @php
-                            $persenBelum = $totalSiswa > 0
-                                ? ($belumLunas / $totalSiswa) * 100
-                                : 0;
-                        @endphp
-
-                        <div
-                            class="progress-belum"
-                            style="width: {{ $persenBelum }}%">
+                        <div class="progress-belum" style="width: {{ $persenBelum }}%">
                         </div>
 
                     </div>
 
                 </div>
 
+            </div>
 
-                {{-- RINGKASAN --}}
+            {{-- RINGKASAN --}}
 
-                <div style="
+            <!-- <div style="
                     margin-top: 35px;
                     padding-top: 20px;
                     border-top: 1px solid #1f2937;
                 ">
 
-                    <!-- <div style="
+                    <div style="
                         color: #64748b;
                         font-size: 12px;
                         margin-bottom: 8px;
@@ -664,11 +890,11 @@
                         font-size: 24px;
                         font-weight: 700;
                     ">
-                        {{ $sudahLunas + $belumLunas }}
+                        {{ $statusLunas + $statusBelumLunas }}
                         siswa
-                    </div> -->
+                    </div>
 
-                </div>
+                </div> -->
 
             </div>
 

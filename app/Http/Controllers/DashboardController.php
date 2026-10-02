@@ -9,33 +9,98 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Total seluruh siswa
-        $totalSiswa = Siswa::count();
 
-        // Total uang yang terkumpul dari pembayaran lunas
-        $kasTerkumpul = Pembayaran::where('status', 'lunas')
-            ->sum('jumlah_bayar');
+    $totalSiswa = Siswa::count();
 
-        // Jumlah siswa yang sudah lunas
-        $sudahLunas = Pembayaran::where('status', 'lunas')
+    $kasTerkumpul = Pembayaran::where('status', 'lunas')
+        ->sum('jumlah_bayar');
+
+    $sudahLunas = Pembayaran::where('status', 'lunas')
+        ->distinct('id_siswa')
+        ->count('id_siswa');
+
+    $belumLunas = $totalSiswa - $sudahLunas;
+
+
+    // =========================
+    // PEMBAYARAN TERBARU
+    // =========================
+
+    $pembayaranTerbaru = Pembayaran::with('siswa')
+        ->orderByDesc('tanggal_bayar')
+        ->take(5)
+        ->get();
+
+
+        // =========================
+        // FILTER BULAN / TAHUN
+        // =========================
+
+        $bulan = request('bulan', now()->month);
+        $tahun = request('tahun', now()->year);
+
+        $daftarBulan = [];
+
+        $mulai = \Carbon\Carbon::create(2026, 1, 1);
+        $sekarang = now()->startOfMonth();
+
+        while ($sekarang->greaterThanOrEqualTo($mulai)) {
+
+            $daftarBulan[] = [
+                'bulan' => $sekarang->month,
+                'tahun' => $sekarang->year,
+                'label' => $sekarang->translatedFormat('M y'),
+            ];
+
+            $sekarang->subMonth();
+        }
+
+        // Status pembayaran berdasarkan bulan dan tahun yang dipilih
+        $statusLunas = Pembayaran::whereMonth('tanggal_bayar', $bulan)
+            ->whereYear('tanggal_bayar', $tahun)
+            ->where('status', 'lunas')
             ->distinct('id_siswa')
             ->count('id_siswa');
 
-        // Jumlah siswa yang belum lunas
-        $belumLunas = $totalSiswa - $sudahLunas;
+        $statusBelumLunas = Pembayaran::whereMonth('tanggal_bayar', $bulan)
+            ->whereYear('tanggal_bayar', $tahun)
+            ->where('status', 'belum lunas')
+            ->distinct('id_siswa')
+            ->count('id_siswa');
 
-        // 5 pembayaran terbaru
-        $pembayaranTerbaru = Pembayaran::with('siswa')
-            ->orderBy('tanggal_bayar', 'desc')
-            ->take(5)
-            ->get();
+        // Daftar tahun yang tersedia di database
+        $tahunList = Pembayaran::selectRaw('YEAR(tanggal_bayar) as tahun')
+            ->distinct()
+            ->orderByDesc('tahun')
+            ->pluck('tahun');
+
+        $daftarBulan = [];
+
+        $mulai = \Carbon\Carbon::create(2026, 1, 1);
+        $sekarang = now()->startOfMonth();
+
+        while ($sekarang->greaterThanOrEqualTo($mulai)) {
+
+            $daftarBulan[] = [
+                'bulan' => $sekarang->month,
+                'tahun' => $sekarang->year,
+                'label' => $sekarang->translatedFormat('M y'),
+            ];
+            $sekarang->subMonth();
+        }
 
         return view('dashboard', compact(
             'totalSiswa',
             'kasTerkumpul',
             'sudahLunas',
             'belumLunas',
-            'pembayaranTerbaru'
+            'pembayaranTerbaru',
+            'statusLunas',
+            'statusBelumLunas',
+            'bulan',
+            'tahun',
+            'daftarBulan',
+            'tahunList'
         ));
     }
 }
