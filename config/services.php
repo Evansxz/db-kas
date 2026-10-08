@@ -14,6 +14,15 @@ return [
     |
     */
 
+    // =========================
+    // TELEGRAM
+    // =========================
+
+    'telegram' => [
+        'bot_token' => env('8948624935:AAH-ki42K4mCNY5oUdKtNwvB0GRj1lY9Yjk'),
+        'chat_id' => env('8700922125'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],
