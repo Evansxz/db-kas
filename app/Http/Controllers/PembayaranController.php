@@ -14,7 +14,7 @@ class PembayaranController extends Controller
     public function index()
     {
         $pembayaran = Pembayaran::with('siswa')
-            ->orderBy('id_pembayaran', 'desc')
+            ->orderByDesc('tanggal_bayar')
             ->get();
 
         return view('pembayaran.index', compact('pembayaran'));

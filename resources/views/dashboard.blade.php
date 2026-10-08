@@ -2,10 +2,305 @@
 <html lang="id">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard - Sistem Kas Kelas</title>
+
+</head>
+
+<body>
+
+    {{-- =========================
+    NAVBAR
+    ========================== --}}
+
+    <nav class="navbar">
+
+        <div class="logo">
+            Sistem Kas Kelas
+        </div>
+
+        <div class="nav-menu">
+
+            <a href="{{ route('dashboard') }}" class="active">
+                Dashboard
+            </a>
+
+            <a href="{{ url('/pembayaran') }}">
+                Data pembayaran
+            </a>
+
+            <a href="{{ url('/siswa') }}">
+                Data siswa
+            </a>
+
+        </div>
+
+        <div class="user-area">
+
+            <div class="avatar">
+                {{ strtoupper(substr(auth()->user()->name ?? 'EV', 0, 2)) }}
+            </div>
+
+            <span class="user-name">
+                {{ auth()->user()->name ?? 'User' }}
+            </span>
+
+            <form action="{{ route('logout') }}" method="POST" class="logout-form">
+
+                @csrf
+
+                <button type="submit" class="logout-button">
+                    Logout
+                </button>
+
+            </form>
+
+        </div>
+
+    </nav>
+
+    {{-- =========================
+    MAIN
+    ========================== --}}
+
+    <main class="container">
+
+        <div class="breadcrumb">
+            Dashboard
+        </div>
+
+        <h1 class="page-title">
+            Dashboard
+        </h1>
+
+        <p class="page-description">
+            Ringkasan kas kelas 12 RPL 1
+        </p>
+
+        {{-- =========================
+        STATISTICS
+        ========================== --}}
+
+        <section class="stats">
+
+            {{-- TOTAL SISWA --}}
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total siswa
+                </div>
+
+                <div class="stat-value">
+                    {{ $totalSiswa }}
+                </div>
+
+                <div class="stat-sub">
+                    siswa terdaftar
+                </div>
+
+            </div>
+
+            {{-- KAS TERKUMPUL --}}
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total kas
+                </div>
+
+                <div class="stat-value">
+                    Rp{{ number_format($kasTerkumpul, 0, ',', '.') }}
+                </div>
+
+                <div class="stat-sub">
+                    kas terkumpul
+                </div>
+
+            </div>
+
+            {{-- SUDAH LUNAS --}}
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Sudah lunas
+                </div>
+
+                <div class="stat-value">
+                    {{ $sudahLunas }}
+                </div>
+
+                <div class="stat-sub">
+                    siswa
+                </div>
+
+            </div>
+
+            {{-- BELUM LUNAS --}}
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Belum lunas
+                </div>
+
+                <div class="stat-value">
+                    {{ $belumLunas }}
+                </div>
+
+                <div class="stat-sub">
+                    siswa
+                </div>
+
+            </div>
+
+        </section>
+
+        {{-- =========================
+        LOWER CONTENT
+        ========================== --}}
+
+        <section class="content">
+
+            {{-- PEMBAYARAN TERBARU --}}
+            <div class="panel panel-recent">
+
+                <div class="panel-header">
+
+                    <h2 class="panel-title">
+                        Pembayaran terbaru
+                    </h2>
+
+                    <a href="{{ url('/pembayaran/create') }}" class="create-button">
+                        + Buat Pembayaran
+                    </a>
+
+                </div>
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Siswa</th>
+                            <th>Tanggal</th>
+                            <th>Jumlah</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @forelse ($pembayaranTerbaru as $pembayaran)
+
+                            <tr>
+
+                                <td>{{ $pembayaran->siswa->nama ?? '-' }}</td>
+
+                                <td>{{ \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y') }}</td>
+
+                                <td>Rp{{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}</td>
+
+                                <td>
+
+                                    @if ($pembayaran->status === 'lunas')
+
+                                        <span class="status status-lunas">Lunas</span>
+
+                                    @else
+
+                                        <span class="status status-belum">Belum lunas</span>
+                                        
+                                    @endif
+                                    
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+                                <td colspan="4">Belum ada pembayaran.</td>
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+                    
+                </table>
+
+            </div>
+
+            {{-- STATUS PEMBAYARAN --}}
+            <div class="panel status-panel">
+
+                <div class="status-title-row">
+
+                    <h2 class="panel-title">
+                        Status pembayaran
+                    </h2>
+
+                    <div class="month-filter">
+
+                        <button type="button" class="month-dropdown-button" onclick="toggleMonthDropdown()">
+                            {{ \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('M Y') }}
+                            <span>▼</span>
+                        </button>
+
+                        <div id="monthDropdown" class="month-dropdown-menu">
+
+                            @foreach($daftarBulan as $item)
+
+                                <a href="{{ route('dashboard', ['bulan' => $item['bulan'], 'tahun' => $item['tahun']]) }}"
+
+                                    class="{{ ($bulan == $item['bulan'] && $tahun == $item['tahun']) ? 'active' : '' }}">
+
+                                    {{ $item['label'] }}
+
+                                </a>
+
+                            @endforeach
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {{-- SUDAHLUNAS --}}
+                <div class="payment-status-item">
+
+                    <div class="status-label">
+                        <span>Sudah lunas</span>
+                        <span>{{ $statusLunas }} siswa</span>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-lunas" style="width: {{ $persenLunas }}%"></div>
+                    </div>
+
+                </div>
+
+                {{-- BELUM LUNAS --}}
+                <div class="payment-status-item">
+
+                    <div class="status-label">
+                        <span>Belum lunas</span>
+                        <span>{{ $statusBelumLunas }} siswa</span>
+                    </div>
+
+                    <div class="progress-bar ">
+                        <div class="progress-fill progress-belum" style="width: {{ $persenBelumLunas }}%"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
 
     <style>
         * {
@@ -56,10 +351,6 @@
         }
 
         .nav-menu a:hover {
-            color: #ffffff;
-        }
-
-        .nav-menu a.active {
             color: #ffffff;
             font-weight: 600;
         }
@@ -324,8 +615,8 @@
             margin-bottom: 0;
         }
 
-        .payment-status+.payment-status {
-            margin-top: 28px;
+        .payment-status-item+.payment-status-item {
+            margin-top: 24px;
         }
 
         /* =========================
@@ -411,20 +702,34 @@
             color: #94a3b8;
         }
 
-        .progress {
-            height: 8px;
+        .status-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
             background: #1f2937;
             border-radius: 10px;
             overflow: hidden;
         }
 
-        .progress-lunas {
+        .progress-fill {
             height: 100%;
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-lunas {
             background: #22c55e;
         }
 
         .progress-belum {
-            height: 100%;
             background: #ef4444;
         }
 
@@ -482,7 +787,6 @@
             }
         }
     </style>
-</head>
 
 <script>
 
@@ -529,379 +833,5 @@
     });
 
 </script>
-
-<body>
-
-    {{-- =========================
-    NAVBAR
-    ========================== --}}
-
-    <nav class="navbar">
-
-        <div class="logo">
-            Sistem Kas Kelas
-        </div>
-
-        <div class="nav-menu">
-
-            <a href="{{ route('dashboard') }}" class="active">
-                Dashboard
-            </a>
-
-            <a href="{{ url('/siswa') }}">
-                Data siswa
-            </a>
-
-            <a href="{{ url('/pembayaran') }}">
-                Data pembayaran
-            </a>
-
-        </div>
-
-        <div class="user-area">
-
-            <div class="avatar">
-                {{ strtoupper(substr(auth()->user()->name ?? 'EV', 0, 2)) }}
-            </div>
-
-            <span class="user-name">
-                {{ auth()->user()->name ?? 'User' }}
-            </span>
-
-            <form action="{{ route('logout') }}" method="POST" class="logout-form">
-
-                @csrf
-
-                <button type="submit" class="logout-button">
-                    Logout
-                </button>
-
-            </form>
-
-        </div>
-
-    </nav>
-
-
-    {{-- =========================
-    MAIN
-    ========================== --}}
-
-    <main class="container">
-
-        <div class="breadcrumb">
-            Dashboard
-        </div>
-
-        <h1 class="page-title">
-            Dashboard
-        </h1>
-
-        <p class="page-description">
-            Ringkasan kas kelas 12 RPL 1
-        </p>
-
-
-        {{-- =========================
-        STATISTICS
-        ========================== --}}
-
-        <section class="stats">
-
-            {{-- TOTAL SISWA --}}
-            <div class="stat-card">
-
-                <div class="stat-label">
-                    Total siswa
-                </div>
-
-                <div class="stat-value">
-                    {{ $totalSiswa }}
-                </div>
-
-                <div class="stat-sub">
-                    siswa terdaftar
-                </div>
-
-            </div>
-
-
-            {{-- KAS TERKUMPUL --}}
-            <div class="stat-card">
-
-                <div class="stat-label">
-                    Total kas
-                </div>
-
-                <div class="stat-value">
-                    Rp{{ number_format($kasTerkumpul, 0, ',', '.') }}
-                </div>
-
-                <div class="stat-sub">
-                    kas terkumpul
-                </div>
-
-            </div>
-
-
-            {{-- SUDAH LUNAS --}}
-            <div class="stat-card">
-
-                <div class="stat-label">
-                    Sudah lunas
-                </div>
-
-                <div class="stat-value">
-                    {{ $sudahLunas }}
-                </div>
-
-                <div class="stat-sub">
-                    siswa
-                </div>
-
-            </div>
-
-
-            {{-- BELUM LUNAS --}}
-            <div class="stat-card">
-
-                <div class="stat-label">
-                    Belum lunas
-                </div>
-
-                <div class="stat-value">
-                    {{ $belumLunas }}
-                </div>
-
-                <div class="stat-sub">
-                    siswa
-                </div>
-
-            </div>
-
-        </section>
-
-
-        {{-- =========================
-        LOWER CONTENT
-        ========================== --}}
-
-        <section class="content">
-
-            {{-- PEMBAYARAN TERBARU --}}
-            <div class="panel panel-recent">
-
-                <div class="panel-header">
-
-                    <h2 class="panel-title">
-                        Pembayaran terbaru
-                    </h2>
-
-                    <a href="{{ url('/pembayaran/create') }}" class="create-button">
-                        + Buat Pembayaran
-                    </a>
-
-                </div>
-
-                <table>
-
-                    <thead>
-                        <tr>
-                            <th>Siswa</th>
-                            <th>Tanggal</th>
-                            <th>Jumlah</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        @forelse ($pembayaranTerbaru as $pembayaran)
-
-                            <tr>
-
-                                <td>
-                                    {{ $pembayaran->siswa->nama ?? '-' }}
-                                </td>
-
-                                <td>
-                                    {{ \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y') }}
-                                </td>
-
-                                <td>
-                                    Rp{{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}
-                                </td>
-
-                                <td>
-
-                                    @if ($pembayaran->status === 'lunas')
-
-                                        <span class="status status-lunas">
-                                            Lunas
-                                        </span>
-
-                                    @else
-
-                                        <span class="status status-belum">
-                                            Belum lunas
-                                        </span>
-
-                                    @endif
-
-                                </td>
-
-                            </tr>
-
-                        @empty
-
-                            <tr>
-
-                                <td colspan="4">
-                                    Belum ada pembayaran.
-                                </td>
-
-                            </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            {{-- STATUS PEMBAYARAN --}}
-            <div class="panel status-panel">
-
-                <div class="status-title-row">
-
-                    <h2 class="panel-title">
-                        Status pembayaran
-                    </h2>
-
-                    <div class="month-filter">
-
-                        <button type="button" class="month-dropdown-button" onclick="toggleMonthDropdown()">
-                            {{ \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('M Y') }}
-                            <span>▼</span>
-                        </button>
-
-                        <div id="monthDropdown" class="month-dropdown-menu">
-
-                            @foreach($daftarBulan as $item)
-
-                                <a href="{{ route('dashboard', ['bulan' => $item['bulan'], 'tahun' => $item['tahun']]) }}"
-
-                                    class="{{ ($bulan == $item['bulan'] && $tahun == $item['tahun']) ? 'active' : '' }}">
-                                    {{ $item['label'] }}
-
-                                </a>
-
-                            @endforeach
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- LUNAS --}}
-                <div class="payment-status">
-
-                    <div class="status-header">
-
-                        <span>
-                            Sudah lunas
-                        </span>
-
-                        <span>
-                            {{ $sudahLunas }} siswa
-                        </span>
-
-                    </div>
-
-                    @php
-                        $persenLunas = $totalSiswa > 0
-                            ? ($sudahLunas / $totalSiswa) * 100
-                            : 0;
-                    @endphp
-
-                    <div class="progress">
-
-                        <div class="progress-lunas" style="width: {{ $persenLunas }}%">
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- BELUM LUNAS --}}
-                <div class="payment-status">
-
-                    <div class="status-header">
-
-                        <span>
-                            Belum lunas
-                        </span>
-
-                        <span>
-                            {{ $belumLunas }} siswa
-                        </span>
-
-                    </div>
-
-                    @php
-                        $persenBelum = $totalSiswa > 0
-                            ? ($belumLunas / $totalSiswa) * 100
-                            : 0;
-                    @endphp
-
-                    <div class="progress">
-
-                        <div class="progress-belum" style="width: {{ $persenBelum }}%">
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {{-- RINGKASAN --}}
-
-            <!-- <div style="
-                    margin-top: 35px;
-                    padding-top: 20px;
-                    border-top: 1px solid #1f2937;
-                ">
-
-                    <div style="
-                        color: #64748b;
-                        font-size: 12px;
-                        margin-bottom: 8px;
-                    ">
-                        Total pembayaran
-                    </div>
-
-                    <div style="
-                        font-size: 24px;
-                        font-weight: 700;
-                    ">
-                        {{ $statusLunas + $statusBelumLunas }}
-                        siswa
-                    </div>
-
-                </div> -->
-
-            </div>
-
-        </section>
-
-    </main>
-
-</body>
 
 </html>

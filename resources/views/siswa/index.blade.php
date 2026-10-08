@@ -1,96 +1,252 @@
 @extends('layouts.app')
 
-@section('title', 'Data Siswa')
+@section('title', 'Data Pembayaran')
 
 @section('content')
 
-<div class="card">
+<body>
 
-    <h1>Data Siswa</h1>
 
-    <a href="{{ route('siswa.create') }}"
-       class="btn btn-primary">
-        + Tambah Siswa
-    </a>
+    {{-- =========================
+         NAVBAR
+    ========================== --}}
 
-    <table>
+    <nav class="navbar">
 
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>NIS</th>
-                <th>Nama</th>
-                <th>Jabatan</th>
-                <th>Kelas</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
 
-        <tbody>
+        <div class="logo">
+            Sistem Kas Kelas
+        </div>
 
-        @forelse($siswa as $item)
 
-            <tr>
-                <td>
-                    {{ $loop->iteration }}
-                </td>
+        <div class="nav-menu">
 
-                <td>
-                    {{ $item->nis }}
-                </td>
+            <a href="{{ route('dashboard') }}">
+                Dashboard
+            </a>
 
-                <td>
-                    {{ $item->nama }}
-                </td>
+            <a href="{{ route('pembayaran.index') }}">
+                Data pembayaran
+            </a>
 
-                <td>
-                    {{ $item->jabatan }}
-                </td>
+            <a href="{{ route('siswa.index') }}" class="active">
+                Data siswa
+            </a>
 
-                <td>
-                    {{ $item->kelas }}
-                </td>
+        </div>
 
-                <td>
-                    <div class="actions">
+        <div class="user-area">
 
-                        <a href="{{ route('siswa.edit', $item->id_siswa) }}"
-                           class="btn btn-warning">
-                            Edit
-                        </a>
+            <div class="avatar">
+                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+            </div>
 
-                        <form action="{{ route('siswa.destroy', $item->id_siswa) }}"
-                              method="POST"
-                              onsubmit="return confirm('Yakin ingin menghapus siswa ini?');">
+            <span class="user-name">
+                {{ auth()->user()->name ?? 'User' }}
+            </span>
 
-                            @csrf
-                            @method('DELETE')
+            <form action="{{ route('logout') }}" method="POST" class="logout-form">
 
-                            <button type="submit"
-                                    class="btn btn-danger">
-                                Hapus
-                            </button>
+                @csrf
 
-                        </form>
+                <button type="submit" class="logout-button">
+                    Logout
+                </button>
 
-                    </div>
-                </td>
-            </tr>
+            </form >
 
-        @empty
+        </div>
 
-            <tr>
-                <td colspan="6">
-                    Belum ada data siswa.
-                </td>
-            </tr>
+    </nav>
 
-        @endforelse
 
-        </tbody>
+    {{-- =========================
+         CONTENT
+    ========================== --}}
 
-    </table>
+    <main class="container">
 
-</div>
+        <div class="breadcrumb">
+            Data siswa
+        </div>
 
-@endsection 
+
+        <h1 class="page-title">
+            Data Siswa
+        </h1>
+
+
+        <p class="page-description">
+            Kelola data siswa kelas 12 RPL 1
+        </p>
+
+
+        {{-- =========================
+             DATA SISWA
+        ========================== --}}
+
+        <section class="data-panel">
+
+
+            <div class="panel-header">
+
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Daftar Siswa
+                    </h2>
+
+
+                    <p class="panel-description">
+                        Data siswa yang terdaftar dalam sistem kas kelas
+                    </p>
+
+                </div>
+
+
+                <a href="{{ route('siswa.create') }}"
+                   class="create-button">
+
+                    + Tambah Siswa
+
+                </a>
+
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+
+                <table>
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>No</th>
+
+                            <th>NIS</th>
+
+                            <th>Nama</th>
+
+                            <th>Jabatan</th>
+
+                            <th>Kelas</th>
+
+                            <th>Aksi</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        @forelse ($siswa as $index => $item)
+
+
+                            <tr>
+
+
+                                <td>
+                                    {{ $index + 1 }}
+                                </td>
+
+
+                                <td>
+                                    {{ $item->nis }}
+                                </td>
+
+
+                                <td>
+                                    {{ $item->nama }}
+                                </td>
+
+
+                                <td>
+                                    {{ $item->jabatan }}
+                                </td>
+
+
+                                <td>
+                                    {{ $item->kelas }}
+                                </td>
+
+
+                                <td>
+
+
+                                    <div class="actions">
+
+
+                                        <a href="{{ route('siswa.edit', $item->id_siswa) }}"
+                                           class="btn-edit">
+
+                                            Edit
+
+                                        </a>
+
+
+                                        <form action="{{ route('siswa.destroy', $item->id_siswa) }}"
+                                              method="POST">
+
+                                            @csrf
+
+                                            @method('DELETE')
+
+
+                                            <button type="submit"
+                                                    class="btn-delete">
+
+                                                Hapus
+
+                                            </button>
+
+
+                                        </form>
+
+
+                                    </div>
+
+
+                                </td>
+
+
+                            </tr>
+
+
+                        @empty
+
+
+                            <tr>
+
+                                <td colspan="6">
+                                    Belum ada data siswa.
+                                </td>
+
+                            </tr>
+
+
+                        @endforelse
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+</body>

@@ -1,181 +1,366 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         @yield('title', 'Sistem Kas Kelas')
     </title>
 
+</head>
+
+    <main class="container">
+
+        @if(session('success'))
+
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+
+        @endif
+
+
+        @if($errors->any())
+
+            <div class="alert alert-danger">
+
+                <strong>Terjadi kesalahan:</strong>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+
+            </div>
+
+        @endif
+
+        @yield('content')
+
+    </main>
+
+</head>
+
     <style>
+
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            color: #333333;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
         }
+
+        /* =========================
+           NAVBAR
+        ========================== */
 
         .navbar {
-            background: #2222;
-            padding: 15px 40px;
+            height: 70px;
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            justify-content: space-between;
         }
 
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin-right: 25px;
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
         }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-menu a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .nav-menu a:hover {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* =========================
+           USER
+        ========================== */
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: #e2e8f0;
+        }
+
+        /* =========================
+           CONTAINER
+        ========================== */
 
         .container {
-            width: 90%;
-            max-width: 1100px;
-            margin: 30px auto;
+            max-width: 1250px;
+            margin: auto;
+            padding: 40px;
         }
 
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        .breadcrumb {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 10px;
         }
 
-        h1 {
-            margin-top: 0;
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 9px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
+        .page-description {
+            color: #94a3b8;
             font-size: 14px;
+            margin-bottom: 30px;
         }
 
-        .btn-primary {
-            background: #99C2FF;
-            color: white;
+
+        /* =========================
+           DATA PEMBAYARAN
+        ========================== */
+
+        .data-panel {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 24px;
         }
 
-        .btn-warning {
-            background: #FFDF82;
-            color: white;
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
-        .btn-danger {
-            background: #FF84BA;
-            color: white;
+        .panel-title {
+            font-size: 17px;
+            font-weight: 600;
         }
 
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
+        .panel-description {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .create-button {
+            display: inline-block;
+            background: #16a34a;
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .create-button:hover {
+            background: #15803d;
+        }
+
+        /* =========================
+           TABLE
+        ========================== */
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
         }
 
         th {
-            background: #f1f5f9;
+            text-align: left;
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+            padding: 12px 8px;
+            border-bottom: 1px solid #1f2937;
         }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-top: 5px;
+        td {
+            padding: 14px 8px;
+            font-size: 13px;
+            color: #cbd5e1;
+            border-bottom: 1px solid #1f2937;
         }
 
-        .form-group {
-            margin-bottom: 15px;
+        tr:last-child td {
+            border-bottom: none;
         }
 
-        .alert {
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        /* =========================
+           STATUS
+        ========================== */
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
         }
 
-        .alert-success {
-            background: #dcfce7;
-            color: #166534;
+        .status-lunas {
+            background: rgba(34, 197, 94, 0.12);
+            color: #4ade80;
         }
 
-        .alert-danger {
-            background: #fee2e2;
-            color: #991b1b;
+        .status-belum {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
         }
+
+        /* =========================
+           ACTION
+        ========================== */
 
         .actions {
             display: flex;
-            gap: 5px;
+            align-items: center;
+            gap: 8px;
         }
 
-        .error {
-            color: #dc2626;
+        .btn-edit,
+        .btn-delete {
+            border: none;
+            border-radius: 7px;
+            padding: 8px 13px;
             font-size: 13px;
-            margin-top: 4px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
         }
+
+        .btn-edit {
+            background: #f59e0b;
+            color: #ffffff;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        .btn-edit:hover {
+            background: #d97706;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        /* =========================
+           LOGOUT
+        ========================== */
+
+        .logout-form {
+            margin-left: 18px;
+        }
+
+        .logout-button {
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            color: #ef4444;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 950px) {
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .container {
+                padding: 30px 20px;
+            }
+
+            .panel-header {
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            .nav-menu {
+                display: none;
+            }
+
+            .panel-header {
+                flex-direction: column;
+            }
+
+            .create-button {
+                width: 100%;
+                text-align: center;
+            }
+
+            th,
+            td {
+                white-space: nowrap;
+            }
+
+        }
+
     </style>
-</head>
 
-<body>
-
-<nav class="navbar">
-    <a href="{{ route('siswa.index') }}">
-        Sistem Kas Kelas
-    </a>
-
-    <a href="{{ route('siswa.index') }}">
-        Data Siswa
-    </a>
-
-    <a href="{{ route('pembayaran.index') }}">
-        Data Pembayaran
-    </a>
-</nav>
-
-<div class="container">
-
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <strong>Terjadi kesalahan:</strong>
-
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    @yield('content')
-
-</div>
-
-</body>
 </html>

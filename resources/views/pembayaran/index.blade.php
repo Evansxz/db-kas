@@ -4,107 +4,202 @@
 
 @section('content')
 
-<div class="card">
+<body>
 
-    <h1>Data Pembayaran</h1>
+    {{-- =========================
+         NAVBAR
+    ========================== --}}
 
-    <a href="{{ route('pembayaran.create') }}"
-       class="btn btn-primary">
-        + Tambah Pembayaran
-    </a>
+    <nav class="navbar">
 
-    <table>
+        <div class="logo">
+            Sistem Kas Kelas
+        </div>
 
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Siswa</th>
-                <th>NIS</th>
-                <th>Tanggal</th>
-                <th>Jumlah</th>
-                <th>Status</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
 
-        <tbody>
+        <div class="nav-menu">
 
-        @forelse($pembayaran as $item)
+            <a href="{{ route('dashboard') }}">
+                Dashboard
+            </a>
 
-            <tr>
-                <td>
-                    {{ $loop->iteration }}
-                </td>
+            <a href="{{ route('pembayaran.index') }}" class="active">
+                Data pembayaran
+            </a>
 
-                <td>
-                    @if($item->siswa)
-                        {{ $item->siswa->nama }}
-                    @else
-                        Siswa sudah dihapus
-                    @endif
-                </td>
+            <a href="{{ route('siswa.index') }}">
+                Data siswa
+            </a>
 
-                <td>
-                    @if($item->siswa)
-                        {{ $item->siswa->nis }}
-                    @else
-                        -
-                    @endif
-                </td>
+        </div>
 
-                <td>
-                    {{ $item->tanggal_bayar }}
-                </td>
+        <div class="user-area">
 
-                <td>
-                    Rp {{ number_format($item->jumlah_bayar, 0, ',', '.') }}
-                </td>
+            <div class="avatar">
+                {{ strtoupper(substr(auth()->user()->name ?? 'EV', 0, 2)) }}
+            </div>
 
-                <td>
-                    {{ $item->status }}
-                </td>
+            <span class="user-name">
+                {{ auth()->user()->name ?? 'User' }}
+            </span>
 
-                <td>
-                    <div class="actions">
+            <form action="{{ route('logout') }}" method="POST" class="logout-form">
 
-                        <a href="{{ route('pembayaran.edit', $item->id_pembayaran) }}"
-                           class="btn btn-warning">
-                            Edit
-                        </a>
+                @csrf
 
-                        <form action="{{ route('pembayaran.destroy', $item->id_pembayaran) }}"
-                              method="POST"
-                              onsubmit="return confirm('Yakin ingin menghapus pembayaran ini?');">
+                <button type="submit" class="logout-button">
+                    Logout
+                </button>
 
-                            @csrf
-                            @method('DELETE')
+            </form>
 
-                            <button type="submit"
-                                    class="btn btn-danger">
-                                Hapus
-                            </button>
+        </div>
 
-                        </form>
+    </nav>
 
-                    </div>
-                </td>
+    {{-- =========================
+         MAIN
+    ========================== --}}
 
-            </tr>
+    <main class="container">
 
-        @empty
+        <div class="breadcrumb">
+            Data pembayaran
+        </div>
 
-            <tr>
-                <td colspan="7">
-                    Belum ada data pembayaran.
-                </td>
-            </tr>
+        <h1 class="page-title">
+            Data Pembayaran
+        </h1>
 
-        @endforelse
+        <p class="page-description">
+            Kelola pembayaran kas kelas 12 RPL 1
+        </p>
 
-        </tbody>
+        {{-- =========================
+             DATA PEMBAYARAN
+        ========================== --}}
 
-    </table>
+        <section class="data-panel">
 
-</div>
+            <div class="panel-header">
 
-@endsection
+                <div>
+
+                    <h2 class="panel-title">
+                        Daftar Pembayaran
+                    </h2>
+
+                    <p class="panel-description">
+                        Data transaksi pembayaran kas kelas
+                    </p>
+
+                </div>
+
+                <a href="{{ url('/pembayaran/create') }}" class="create-button">
+                    + Buat Pembayaran
+                </a>
+
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>No</th>
+                            <th>Siswa</th>
+                            <th>NIS</th>
+                            <th>Tanggal</th>
+                            <th>Jumlah</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @forelse ($pembayaran as $index => $item)
+
+                            <tr>
+
+                                <td>{{ $index + 1 }}</td>
+
+                                <td>{{ $item->siswa->nama }}</td>
+
+                                <td>{{ $item->siswa->nis }}</td>
+
+                                <td>{{ \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') }}</td>
+
+                                <td>Rp {{ number_format($item->jumlah_bayar, 0, ',', '.') }}</td>
+
+                                <td>
+
+                                    @if ($item->status === 'lunas')
+
+                                        <span class="status status-lunas">
+                                            Lunas
+                                        </span>
+
+                                    @else
+
+                                        <span class="status status-belum">
+                                            Belum lunas
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <a href="{{ route('pembayaran.edit', $item->id_pembayaran) }}" class="btn-edit">
+                                            Edit
+                                        </a>
+
+                                        <form action="{{ route('pembayaran.destroy', $item->id_pembayaran) }}" method="POST">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit" class="btn-delete">
+                                                Hapus
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+
+                                <td colspan="7">
+                                    Belum ada data pembayaran.
+                                </td>
+
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>

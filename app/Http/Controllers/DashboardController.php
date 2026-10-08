@@ -10,26 +10,26 @@ class DashboardController extends Controller
     public function index()
     {
 
-    $totalSiswa = Siswa::count();
+        $totalSiswa = Siswa::count();
 
-    $kasTerkumpul = Pembayaran::where('status', 'lunas')
-        ->sum('jumlah_bayar');
+        $kasTerkumpul = Pembayaran::where('status', 'lunas')
+            ->sum('jumlah_bayar');
 
-    $sudahLunas = Pembayaran::where('status', 'lunas')
-        ->distinct('id_siswa')
-        ->count('id_siswa');
+        $sudahLunas = Pembayaran::where('status', 'lunas')
+            ->distinct('id_siswa')
+            ->count('id_siswa');
 
-    $belumLunas = $totalSiswa - $sudahLunas;
+        $belumLunas = $totalSiswa - $sudahLunas;
 
 
-    // =========================
-    // PEMBAYARAN TERBARU
-    // =========================
+        // =========================
+        // PEMBAYARAN TERBARU
+        // =========================
 
-    $pembayaranTerbaru = Pembayaran::with('siswa')
-        ->orderByDesc('tanggal_bayar')
-        ->take(5)
-        ->get();
+        $pembayaranTerbaru = Pembayaran::with('siswa')
+            ->orderByDesc('tanggal_bayar')
+            ->take(5)
+            ->get();
 
 
         // =========================
@@ -60,7 +60,7 @@ class DashboardController extends Controller
             ->whereYear('tanggal_bayar', $tahun)
             ->where('status', 'lunas')
             ->distinct('id_siswa')
-            ->count('id_siswa');
+            ->count('id_siswa');  
 
         $statusBelumLunas = Pembayaran::whereMonth('tanggal_bayar', $bulan)
             ->whereYear('tanggal_bayar', $tahun)
@@ -68,26 +68,13 @@ class DashboardController extends Controller
             ->distinct('id_siswa')
             ->count('id_siswa');
 
-        // Daftar tahun yang tersedia di database
-        $tahunList = Pembayaran::selectRaw('YEAR(tanggal_bayar) as tahun')
-            ->distinct()
-            ->orderByDesc('tahun')
-            ->pluck('tahun');
+        $persenLunas = $totalSiswa > 0
+            ? ($statusLunas / $totalSiswa) * 100
+            : 0; 
 
-        $daftarBulan = [];
-
-        $mulai = \Carbon\Carbon::create(2026, 1, 1);
-        $sekarang = now()->startOfMonth();
-
-        while ($sekarang->greaterThanOrEqualTo($mulai)) {
-
-            $daftarBulan[] = [
-                'bulan' => $sekarang->month,
-                'tahun' => $sekarang->year,
-                'label' => $sekarang->translatedFormat('M y'),
-            ];
-            $sekarang->subMonth();
-        }
+        $persenBelumLunas = $totalSiswa > 0
+            ? ($statusBelumLunas / $totalSiswa) * 100
+            : 0;
 
         return view('dashboard', compact(
             'totalSiswa',
@@ -97,10 +84,11 @@ class DashboardController extends Controller
             'pembayaranTerbaru',
             'statusLunas',
             'statusBelumLunas',
+            'persenLunas',
+            'persenBelumLunas',
             'bulan',
             'tahun',
-            'daftarBulan',
-            'tahunList'
+            'daftarBulan'
         ));
     }
 }
